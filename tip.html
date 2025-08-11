@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TipSmart - Advanced Tip Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #3730a3;
+            --secondary-color: #10b981;
+            --background: #ffffff;
+            --surface: #f8fafc;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --background: #111827;
+            --surface: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --border: #374151;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--background) 0%, var(--surface) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow);
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            background: var(--background);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .currency-input {
+            position: relative;
+        }
+
+        .currency-select {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .currency-input input {
+            padding-left: 60px;
+        }
+
+        .tip-presets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .preset-btn {
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--background);
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .preset-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .preset-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .service-quality {
+            margin: 20px 0;
+        }
+
+        .quality-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border);
+            outline: none;
+            margin: 15px 0;
+        }
+
+        .quality-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .quality-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .split-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .split-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .split-btn:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        .split-display {
+            font-size: 1.2rem;
+            font-weight: 600;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .results {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .result-row:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .result-label {
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .history {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .history-item {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .location-tip {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .voice-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .voice-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary-hover);
+        }
+
+        .voice-btn.listening {
+            animation: pulse 1.5s infinite;
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--secondary-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tip-presets {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                🌓
+            </button>
+            <h1>TipSmart</h1>
+            <p>Advanced tip calculator with smart features</p>
+        </div>
+
+        <div class="location-tip" id="locationTip">
+            📍 In your region, typical tip ranges from 10-15%
+        </div>
+
+        <div class="card">
+            <div class="input-group">
+                <label for="billAmount">Bill Amount</label>
+                <div class="currency-input">
+                    <select class="currency-select" id="currency" onchange="updateCurrency()">
+                        <option value="₹">₹</option>
+                        <option value="$">$</option>
+                        <option value="€">€</option>
+                        <option value="£">£</option>
+                        <option value="¥">¥</option>
+                    </select>
+                    <input type="number" id="billAmount" class="input-field" step="0.01" placeholder="0.00" oninput="calculateTip()">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="taxRate">Tax Rate (optional)</label>
+                <input type="number" id="taxRate" class="input-field" step="0.1" placeholder="0.0%" oninput="calculateTip()">
+            </div>
+
+            <div class="input-group">
+                <label>Service Quality</label>
+                <input type="range" class="quality-slider" id="serviceQuality" min="1" max="5" value="3" oninput="updateServiceQuality()">
+                <div class="quality-labels">
+                    <span>Poor</span>
+                    <span>Average</span>
+                    <span>Excellent</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Tip Percentage</label>
+                <div class="tip-presets">
+                    <button class="preset-btn" data-tip="10" onclick="setTipPreset(10)">
+                        Poor Service<br><strong>10%</strong>
+                    </button>
+                    <button class="preset-btn" data-tip="15" onclick="setTipPreset(15)">
+                        Good Service<br><strong>15%</strong>
+                    </button>
+                    <button class="preset-btn active" data-tip="18" onclick="setTipPreset(18)">
+                        Great Service<br><strong>18%</strong>
+                    </button>
+                    <button class="preset-btn" data-tip="20" onclick="setTipPreset(20)">
+                        Excellent<br><strong>20%</strong>
+                    </button>
+                </div>
+                <input type="number" id="tipPercentage" class="input-field" step="0.1" placeholder="Custom %" oninput="calculateTip()">
+            </div>
+
+            <div class="input-group">
+                <label>Split Between People</label>
+                <div class="split-controls">
+                    <button class="split-btn" onclick="changeSplit(-1)">-</button>
+                    <div class="split-display" id="splitCount">1 person</div>
+                    <button class="split-btn" onclick="changeSplit(1)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <div class="result-row">
+                <span class="result-label">Bill Amount:</span>
+                <span class="result-value" id="displayBill">₹0.00</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Tax Amount:</span>
+                <span class="result-value" id="displayTax">₹0.00</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Tip Amount:</span>
+                <span class="result-value" id="displayTip">₹0.00</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Total:</span>
+                <span class="result-value" id="displayTotal">₹0.00</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Per Person:</span>
+                <span class="result-value" id="displayPerPerson">₹0.00</span>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="action-btn btn-primary" onclick="shareResult()">
+                📱 Share Split
+            </button>
+            <button class="action-btn btn-secondary" onclick="exportToPDF()">
+                📄 Export PDF
+            </button>
+        </div>
+    </div>
+
+    <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceInput()" title="Voice Input">
+        🎤
+    </button>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Global state
+        let currentSplit = 1;
+        let currentCurrency = '₹';
+        let isListening = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default tip percentage
+            document.getElementById('tipPercentage').value = 18;
+            
+            // Load theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Set location-based tip suggestion
+            setLocationTip();
+            
+            calculateTip();
+        });
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            showNotification(`Switched to ${newTheme} mode`);
+        }
+
+        function updateCurrency() {
+            currentCurrency = document.getElementById('currency').value;
+            calculateTip();
+        }
+
+        function setTipPreset(percentage) {
+            // Update active preset
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-tip="${percentage}"]`).classList.add('active');
+            
+            // Update input and calculate
+            document.getElementById('tipPercentage').value = percentage;
+            calculateTip();
+        }
+
+        function updateServiceQuality() {
+            const quality = document.getElementById('serviceQuality').value;
+            const tipSuggestions = [8, 12, 15, 18, 22]; // Based on quality 1-5
+            const suggestedTip = tipSuggestions[quality - 1];
+            
+            document.getElementById('tipPercentage').value = suggestedTip;
+            
+            // Update preset selection
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            const matchingBtn = document.querySelector(`[data-tip="${suggestedTip}"]`);
+            if (matchingBtn) matchingBtn.classList.add('active');
+            
+            calculateTip();
+        }
+
+        function changeSplit(delta) {
+            currentSplit = Math.max(1, currentSplit + delta);
+            const splitDisplay = document.getElementById('splitCount');
+            splitDisplay.textContent = currentSplit === 1 ? '1 person' : `${currentSplit} people`;
+            calculateTip();
+        }
+
+        function calculateTip() {
+            const billAmount = parseFloat(document.getElementById('billAmount').value) || 0;
+            const tipPercentage = parseFloat(document.getElementById('tipPercentage').value) || 0;
+            const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+
+            // Calculate amounts
+            const taxAmount = billAmount * (taxRate / 100);
+            const tipAmount = billAmount * (tipPercentage / 100);
+            const totalAmount = billAmount + taxAmount + tipAmount;
+            const perPersonAmount = totalAmount / currentSplit;
+
+            // Update display
+            document.getElementById('displayBill').textContent = formatCurrency(billAmount);
+            document.getElementById('displayTax').textContent = formatCurrency(taxAmount);
+            document.getElementById('displayTip').textContent = formatCurrency(tipAmount);
+            document.getElementById('displayTotal').textContent = formatCurrency(totalAmount);
+            document.getElementById('displayPerPerson').textContent = formatCurrency(perPersonAmount);
+        }
+
+        function formatCurrency(amount) {
+            return currentCurrency + amount.toFixed(2);
+        }
+
+        function shareResult() {
+            const bill = parseFloat(document.getElementById('billAmount').value) || 0;
+            const tip = parseFloat(document.getElementById('tipPercentage').value) || 0;
+            const total = bill * (1 + tip / 100);
+            const perPerson = total / currentSplit;
+
+            const message = `💰 Bill Split Details:\n` +
+                           `Bill: ${formatCurrency(bill)}\n` +
+                           `Tip (${tip}%): ${formatCurrency(bill * tip / 100)}\n` +
+                           `Total: ${formatCurrency(total)}\n` +
+                           `Per person: ${formatCurrency(perPerson)} (${currentSplit} ${currentSplit === 1 ? 'person' : 'people'})\n\n` +
+                           `Calculated with TipSmart 🧮`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Bill Split Details',
+                    text: message
+                });
+            } else {
+                navigator.clipboard.writeText(message).then(() => {
+                    showNotification('Split details copied to clipboard!');
+                });
+            }
+        }
+
+        function exportToPDF() {
+            const bill = parseFloat(document.getElementById('billAmount').value) || 0;
+            const tip = parseFloat(document.getElementById('tipPercentage').value) || 0;
+            const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+            
+            if (bill <= 0) {
+                showNotification('Please enter a bill amount first');
+                return;
+            }
+
+            // Calculate amounts
+            const taxAmount = bill * (taxRate / 100);
+            const tipAmount = bill * (tip / 100);
+            const totalAmount = bill + taxAmount + tipAmount;
+            const perPersonAmount = totalAmount / currentSplit;
+            
+            // Create PDF content
+            const date = new Date().toLocaleDateString();
+            const time = new Date().toLocaleTimeString();
+            
+            const pdfContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tip Calculator Receipt</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; border-bottom: 2px solid #4f46e5; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { color: #4f46e5; margin: 0; font-size: 2.5em; }
+        .header p { color: #6b7280; margin: 5px 0; }
+        .details { background: #f8fafc; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 15px; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+        .row:last-child { border-bottom: 2px solid #4f46e5; font-weight: bold; font-size: 1.2em; }
+        .label { font-weight: 600; }
+        .value { font-weight: bold; }
+        .footer { text-align: center; color: #6b7280; font-size: 0.9em; margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px; }
+        .per-person { background: #4f46e5; color: white; padding: 15px; border-radius: 10px; text-align: center; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧮 TipSmart</h1>
+        <p>Bill Split Receipt</p>
+        <p>${date} at ${time}</p>
+    </div>
+    
+    <div class="details">
+        <div class="row">
+            <span class="label">Bill Amount:</span>
+            <span class="value">${formatCurrency(bill)}</span>
+        </div>
+        ${taxAmount > 0 ? `<div class="row">
+            <span class="label">Tax (${taxRate}%):</span>
+            <span class="value">${formatCurrency(taxAmount)}</span>
+        </div>` : ''}
+        <div class="row">
+            <span class="label">Tip (${tip}%):</span>
+            <span class="value">${formatCurrency(tipAmount)}</span>
+        </div>
+        <div class="row">
+            <span class="label">Total Amount:</span>
+            <span class="value">${formatCurrency(totalAmount)}</span>
+        </div>
+    </div>
+    
+    ${currentSplit > 1 ? `<div class="per-person">
+        <h3>Split between ${currentSplit} people</h3>
+        <p style="font-size: 1.5em; margin: 10px 0;">${formatCurrency(perPersonAmount)} per person</p>
+    </div>` : ''}
+    
+    <div class="footer">
+        <p>Generated by TipSmart - Advanced Tip Calculator</p>
+        <p>Thank you for using our service! 🙏</p>
+    </div>
+</body>
+</html>`;
+
+            // Create and download PDF
+            const blob = new Blob([pdfContent], { type: 'text/html' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `TipSmart_Receipt_${date.replace(/\//g, '-')}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showNotification('Receipt downloaded! Open in browser and print to PDF');
+        }
+
+        function setLocationTip() {
+            // Simulated location-based tip suggestion
+            const tipCultures = {
+                'IN': 'In India, 10-15% tip is standard at restaurants',
+                'US': 'In the US, 18-22% tip is customary for good service',
+                'UK': 'In the UK, 10-15% tip is appropriate if service charge not included',
+                'EU': 'In Europe, 5-10% tip or rounding up is common',
+                'default': 'Typical tip ranges from 10-15% in most regions'
+            };
+            
+            // Default to India since user is in Amaravati, Andhra Pradesh
+            document.getElementById('locationTip').textContent = '📍 ' + tipCultures['IN'];
+        }
+
+        function toggleVoiceInput() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showNotification('Voice input not supported in this browser');
+                return;
+            }
+
+            const voiceBtn = document.getElementById('voiceBtn');
+            
+            if (isListening) {
+                stopListening();
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = function() {
+                isListening = true;
+                voiceBtn.classList.add('listening');
+                voiceBtn.textContent = '🔴';
+                showNotification('Listening... Say something like "Calculate tip for 250 at 15%"');
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                parseVoiceInput(transcript);
+            };
+
+            recognition.onerror = function(event) {
+                showNotification('Voice recognition error: ' + event.error);
+                stopListening();
+            };
+
+            recognition.onend = function() {
+                stopListening();
+            };
+
+            recognition.start();
+        }
+
+        function stopListening() {
+            isListening = false;
+            const voiceBtn = document.getElementById('voiceBtn');
+            voiceBtn.classList.remove('listening');
+            voiceBtn.textContent = '🎤';
+        }
+
+        function parseVoiceInput(text) {
+            // Extract numbers and keywords from voice input
+            const billMatch = text.match(/(?:bill|amount|total)?\s*(?:of|for)?\s*(\d+(?:\.\d+)?)/i);
+            const tipMatch = text.match(/(\d+(?:\.\d+)?)\s*percent|(\d+(?:\.\d+)?)\s*%/i);
+            const splitMatch = text.match(/split\s*(?:between|among)?\s*(\d+)/i);
+
+            if (billMatch) {
+                document.getElementById('billAmount').value = billMatch[1];
+                showNotification(`Set bill amount to ${currentCurrency}${billMatch[1]}`);
+            }
+
+            if (tipMatch) {
+                const tipValue = tipMatch[1] || tipMatch[2];
+                document.getElementById('tipPercentage').value = tipValue;
+                setTipPreset(parseInt(tipValue));
+                showNotification(`Set tip to ${tipValue}%`);
+            }
+
+            if (splitMatch) {
+                currentSplit = parseInt(splitMatch[1]);
+                const splitDisplay = document.getElementById('splitCount');
+                splitDisplay.textContent = currentSplit === 1 ? '1 person' : `${currentSplit} people`;
+                showNotification(`Split between ${currentSplit} people`);
+            }
+
+            calculateTip();
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'p':
+                        e.preventDefault();
+                        exportToPDF();
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        shareResult();
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
